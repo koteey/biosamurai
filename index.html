@@ -11,7 +11,7 @@
         <!-- // koteey.github.io // -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>САМУРАЙ 2077 Profile</title>
+    <title>~kotee~ Profile</title>
     <style>
         * {
             margin: 0;
@@ -285,14 +285,14 @@
                 this.canvas = document.getElementById('networkCanvas');
                 this.ctx = this.canvas.getContext('2d');
                 this.particles = [];
-                this.initialParticlesCreated = false;
+                this.initialParticlesCreated = false; // Флаг для отслеживания начального создания
                 
                 // === НАСТРОЙКИ ===
-                this.initialParticleCount = 100;
-                this.particleSpawnRate = 2;
-                this.maxParticles = 200;
-                this.particleSpeed = 1.0;
-                this.particleSize = 4;
+                this.initialParticleCount = 600;      // Количество частиц при загрузке страницы
+                this.particleSpawnRate = 5;           // Частота появления новых частиц из краев (частиц за кадр)
+                this.maxParticles = 600;              // Максимальное количество частиц
+                this.particleSpeed = 0.100;             // Скорость частиц (чем больше, тем быстрее)
+                this.particleSize = 1.5;                // Размер частиц
                 // =================
                 
                 this.connectionDistance = 150;
@@ -305,7 +305,7 @@
             
             init() {
                 this.resize();
-                this.createInitialParticles();
+                this.createInitialParticles(); // Создаем начальные частицы
                 window.addEventListener('resize', () => this.resize());
             }
             
@@ -313,23 +313,26 @@
                 this.canvas.width = window.innerWidth;
                 this.canvas.height = window.innerHeight;
                 
+                // Адаптация максимального количества частиц под размер экрана
                 const screenWidth = window.innerWidth;
                 if (screenWidth < 768) {
-                    this.initialParticleCount = 50;
-                    this.maxParticles = 80;
+                    this.initialParticleCount = 50;   // Для телефонов
+                    this.maxParticles = 80;           // Для телефонов
                 } else if (screenWidth < 1024) {
-                    this.initialParticleCount = 80;
-                    this.maxParticles = 150;
+                    this.initialParticleCount = 80;   // Для планшетов
+                    this.maxParticles = 150;          // Для планшетов
                 } else {
-                    this.initialParticleCount = 100;
-                    this.maxParticles = 200;
+                    this.initialParticleCount = 300;  // Для десктопов
+                    this.maxParticles = 350;          // Для десктопов
                 }
                 
+                // Пересоздаем начальные частицы при изменении размера
                 if (!this.initialParticlesCreated) {
                     this.createInitialParticles();
                 }
             }
             
+            // Создание начальных частиц, равномерно распределенных по экрану
             createInitialParticles() {
                 this.particles = [];
                 for (let i = 0; i < this.initialParticleCount; i++) {
@@ -338,10 +341,16 @@
                 this.initialParticlesCreated = true;
             }
             
+            // Создание частицы в случайном месте на экране
             createRandomParticle() {
+                // Random particle type
                 const types = ['circle', 'star', 'square'];
                 const type = types[Math.floor(Math.random() * types.length)];
+                
+                // Random size
                 const size = Math.random() * this.particleSize + 1;
+                
+                // Random speed and direction
                 const speed = Math.random() * this.particleSpeed + 0.5;
                 const angle = Math.random() * Math.PI * 2;
                 
@@ -356,32 +365,38 @@
                 };
             }
             
+            // Создание частицы из края экрана
             spawnParticleFromEdge() {
                 const side = Math.floor(Math.random() * 4);
                 let x, y;
                 
                 switch(side) {
-                    case 0:
+                    case 0: // Top
                         x = Math.random() * this.canvas.width;
                         y = -10;
                         break;
-                    case 1:
+                    case 1: // Right
                         x = this.canvas.width + 10;
                         y = Math.random() * this.canvas.height;
                         break;
-                    case 2:
+                    case 2: // Bottom
                         x = Math.random() * this.canvas.width;
                         y = this.canvas.height + 10;
                         break;
-                    case 3:
+                    case 3: // Left
                         x = -10;
                         y = Math.random() * this.canvas.height;
                         break;
                 }
                 
+                // Random particle type
                 const types = ['circle', 'star', 'square'];
                 const type = types[Math.floor(Math.random() * types.length)];
+                
+                // Random size
                 const size = Math.random() * this.particleSize + 1;
+                
+                // Random speed
                 const speed = Math.random() * this.particleSpeed + 0.5;
                 const angle = Math.random() * Math.PI * 2;
                 
@@ -397,6 +412,7 @@
             }
             
             updateParticles() {
+                // Spawn new particles from edges (только если уже созданы начальные частицы)
                 if (this.initialParticlesCreated) {
                     for(let i = 0; i < this.particleSpawnRate; i++) {
                         if(this.particles.length < this.maxParticles) {
@@ -405,18 +421,22 @@
                     }
                 }
                 
+                // Update existing particles
                 for(let i = this.particles.length - 1; i >= 0; i--) {
                     let particle = this.particles[i];
                     
+                    // Update position
                     particle.x += particle.speedX;
                     particle.y += particle.speedY;
                     
+                    // Remove particles that are out of screen
                     if(particle.x < -50 || particle.x > this.canvas.width + 50 ||
                        particle.y < -50 || particle.y > this.canvas.height + 50) {
                         this.particles.splice(i, 1);
                         continue;
                     }
                     
+                    // Mouse interaction
                     if (this.mouse.x !== null && this.mouse.y !== null) {
                         let dx = particle.x - this.mouse.x;
                         let dy = particle.y - this.mouse.y;
@@ -458,8 +478,10 @@
             }
             
             drawParticles() {
+                // Clear canvas
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 
+                // Draw connections
                 for (let i = 0; i < this.particles.length; i++) {
                     for (let j = i + 1; j < this.particles.length; j++) {
                         let dx = this.particles[i].x - this.particles[j].x;
@@ -478,6 +500,7 @@
                     }
                 }
                 
+                // Draw particles
                 for (let i = 0; i < this.particles.length; i++) {
                     let particle = this.particles[i];
                     this.ctx.beginPath();
@@ -514,11 +537,13 @@
             }
         }
 
+        // Calculate days until birthday
         function calculateDaysUntilBirthday() {
             const today = new Date();
             const currentYear = today.getFullYear();
-            const birthday = new Date(currentYear, 1, 20); // Февраль 20
+            const birthday = new Date(currentYear, 0, 24); // Январь 24
             
+            // Если день рождения уже прошел в этом году, считаем до следующего года
             if (today > birthday) {
                 birthday.setFullYear(currentYear + 1);
             }
@@ -528,17 +553,20 @@
             return diffDays;
         }
 
+        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', () => {
             new NetworkBackground();
             
+            // Update birthday counter
             const daysCountElement = document.getElementById('days-count');
             const daysUntil = calculateDaysUntilBirthday();
             daysCountElement.textContent = daysUntil;
         });
 
+        // Avatar Hover Effect
         const profileImage = document.querySelector('.profile-image');
         profileImage.addEventListener('click', () => {
-            window.location.href = 'https://t.me/dasyrj';
+            window.location.href = 'https://t.me/treffb';
         });
     </script>
 </body>
